@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.UserRepository.UserRepository;
 import com.example.demo.dto.request.UserCreationRequest;
+import com.example.demo.dto.request.UserUpdateRequest;
 import com.example.demo.dto.response.UserResponse;
 import com.example.demo.entity.User;
 import com.example.demo.exception.AppException;
@@ -19,7 +20,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class UserService {
    final   UserRepository userRepository;
-    UserMapper userMapper;
+    final UserMapper userMapper;
     public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())){
             throw new AppException(ErrorCode.USER_EXISTED);
@@ -35,5 +36,23 @@ public class UserService {
     public UserResponse getUser(String id) {
         return userMapper.toUserResponse(userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found")));
+    }
+
+    public UserResponse updateUser(String userId, UserUpdateRequest request) {
+        // 1. Tìm user, nếu không thấy thì quăng lỗi (bạn đã có GlobalExceptionHandler xử lý rồi)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // 2. Map dữ liệu từ request vào entity đang có
+        userMapper.updateUser(user, request);
+
+        // 3. Lưu và trả về kết quả
+        return userMapper.toUserResponse(userRepository.save(user));
+    }
+    public void deleteUser(String  userId){
+        if (!userRepository.existsByUsername(userId)){
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+        userRepository.deleteById(userId);
     }
 }

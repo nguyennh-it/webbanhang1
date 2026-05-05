@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Thêm Đồ Thể Thao Mới</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">           //Cấu trúc khung (Body & Layout)
+<div class="card shadow p-4">
+    <h2>Thêm Sản Phẩm Mới ⚽</h2>
+    <form th:action="@{/store/add}" method="post">  //Trái tim của trang: Thẻ Form
+        <div class="mb-3">
+            <label class="form-label">Tên sản phẩm:</label>
+            <input type="text" name="name" class="form-control" placeholder="Ví dụ: Giày đá bóng Nike" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mô tả:</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Giá tiền (VNĐ):</label>
+            <input type="number" name="price" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Link ảnh:</label>
+            <input type="text" name="imageUrl" class="form-control"
+                   placeholder="https://placehold.co/300x200">
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">Lưu Sản Phẩm</button>
+        <a href="/store/products" class="btn btn-secondary w-100 mt-2">Quay lại danh sách</a>
+    </form>
+</div>
+</body>
+</html>

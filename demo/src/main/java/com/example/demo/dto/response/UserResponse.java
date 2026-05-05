@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Builder
 public class UserResponse {
     String id;
-    String name;       // Trùng với tên 'name' trong Request của bạn
+    String username;       // khớp với User entity
     String firstname;
     String lastname;
     LocalDate dob;

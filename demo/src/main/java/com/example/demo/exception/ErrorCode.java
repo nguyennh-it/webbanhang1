@@ -15,6 +15,7 @@ public enum ErrorCode {
     USER_EXISTED(1005, "Người dùng đã tồn tại",HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID(1006,"Mật khẩu phải có 8 ký tự trở lên",HttpStatus.BAD_REQUEST),
     USERNAME_INVALID(1007, "Người dùng phải có 3 ký tự trở lên",HttpStatus.BAD_REQUEST ),
+    USER_NOT_EXISTED(1005, "Người dùng không  tồn tại",HttpStatus.BAD_REQUEST)
     ;
 
 
