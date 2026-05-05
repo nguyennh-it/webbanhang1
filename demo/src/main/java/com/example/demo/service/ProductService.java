@@ -50,4 +50,11 @@ public class ProductService {
                 .map(productMapper::toProductResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
     }
+    public List<ProductResponse> searchProducts(String keyword) {
+        // Gọi repository để tìm danh sách product theo tên
+        return productRepository.findByNameContainingIgnoreCase(keyword)
+                .stream()
+                .map(productMapper::toProductResponse) // Chuyển đổi sang DTO nếu bạn đang dùng MapStruct
+                .toList();
+    }
 }

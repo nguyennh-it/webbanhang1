@@ -19,9 +19,18 @@ public class ProductViewController {
 
     // Hiển thị danh sách sản phẩm
     @GetMapping("/products")
-    public String listProducts(Model model) {
-        model.addAttribute("products", productService.getAllProducts());
-        return "product-list"; // → templates/product-list.html
+    public String listProducts(
+            Model model,
+            @RequestParam(name = "keyword", required = false) String keyword) {
+
+        // Nếu có keyword thì tìm kiếm, không thì lấy tất cả
+        var products = (keyword != null && !keyword.isEmpty())
+                ? productService.searchProducts(keyword)
+                : productService.getAllProducts();
+
+        model.addAttribute("products", products);
+        model.addAttribute("keyword", keyword); // Gửi lại keyword để giữ chữ trong ô nhập
+        return "product-list";
     }
 
     // Hiển thị form thêm sản phẩm
@@ -57,4 +66,7 @@ public class ProductViewController {
         productService.deleteProduct(id);
         return "redirect:/store/products";
     }
+
+    // Hiển thị danh sách sản phẩm (Có hỗ trợ tìm kiếm)
+
 }

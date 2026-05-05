@@ -1,39 +1,18 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="referrer" content="no-referrer">
-    <title>Shop Đồ Thể Thao</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <style>
-        /* Ảnh luôn cố định chiều cao, không bị méo */
-        .product-card .card-img-top {
-            height: 360px;
-            object-fit: cover;
-        }
-
-        /* Card body dùng flex để đẩy nút xuống đáy */
-        .product-card .card-body {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Phần giá + nút luôn nằm ở đáy card */
-        .product-card .card-footer-area {
-            margin-top: auto;
-        }
-    </style>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Cửa Hàng Đồ Thể Thao</title>
+    <!-- 1. Thay thế CSS và Meta -->
+    <th:block th:replace="~{layout :: header-css}"></th:block>
 </head>
 <body class="bg-light">
 
-<div class="container mt-5">
-    <h1 class="text-center mb-4">👟 Cửa Hàng Đồ Thể Thao ⚽</h1>
-    <div class="text-center mb-4">
-        <a href="/store/add" class="btn btn-success">➕ Thêm Sản Phẩm Mới</a>
-    </div>
+<!-- 2. Nhúng thanh Menu chung (Đã có sẵn nút Thêm và Tìm kiếm) -->
+<div th:replace="~{layout :: navbar}"></div>
 
-    <!-- row-cols-md-3 + g-4 giúp các card đều nhau và có khoảng cách đẹp -->
+<div class="container mt-5">
+    <!-- Giữ lại tiêu đề nếu bạn muốn hiện cả ở Navbar và ở giữa trang -->
+    <h1 class="text-center mb-4">👟 Danh Mục Sản Phẩm ⚽</h1>
+
     <div class="row row-cols-1 row-cols-md-3 g-4">
         <div class="col" th:each="p : ${products}">
             <div class="card h-100 shadow-sm product-card">
@@ -63,6 +42,9 @@
         </div>
     </div>
 </div>
+
+<!-- 3. Nhúng Chân trang chung -->
+<div th:replace="~{layout :: footer}"></div>
 
 </body>
 </html>
