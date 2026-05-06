@@ -1,5 +1,7 @@
 package com.example.demo.service;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import com.example.demo.UserRepository.ProductRepository;
 import com.example.demo.dto.request.ProductRequest;
 import com.example.demo.dto.response.ProductResponse;
@@ -12,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +28,6 @@ public class ProductService {
         }
         Product product=productMapper.toProduct(request);
         return productMapper.toProductResponse(productRepository.save(product));
-    }
-
-    public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream().map(productMapper::toProductResponse)
-                .toList();
     }
 
     public void deleteProduct(String id) {
@@ -50,11 +46,21 @@ public class ProductService {
                 .map(productMapper::toProductResponse)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
     }
-    public List<ProductResponse> searchProducts(String keyword) {
-        // Gọi repository để tìm danh sách product theo tên
-        return productRepository.findByNameContainingIgnoreCase(keyword)
-                .stream()
-                .map(productMapper::toProductResponse) // Chuyển đổi sang DTO nếu bạn đang dùng MapStruct
-                .toList();
+    // Sửa lại để hỗ trợ phân trang và tìm kiếm gộp làm một
+    public Page<ProductResponse> getProducts(int page, int size, String keyword) {
+        // 1. Tạo đối tượng Pageable (trang bắt đầu từ 0)
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Product> productPage;
+
+        // 2. Logic: Nếu có từ khóa thì tìm theo tên + phân trang, không thì lấy hết + phân trang
+        if (keyword != null && !keyword.isEmpty()) {
+            productPage = productRepository.findByNameContainingIgnoreCase(keyword, pageable);
+        } else {
+            productPage = productRepository.findAll(pageable);
+        }
+
+        // 3. Chuyển đổi từ Page<Entity> sang Page<ResponseDTO> bằng MapStruct
+        return productPage.map(productMapper::toProductResponse);
     }
 }

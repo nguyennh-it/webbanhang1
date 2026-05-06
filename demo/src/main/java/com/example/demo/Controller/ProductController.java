@@ -25,12 +25,7 @@ public class ProductController {
                 .result(productService.createProduct(request))
                 .build();
     }
-    @GetMapping
-    public ApiResponse<List<ProductResponse>>  getAllProducts(){
-        return ApiResponse.<List<ProductResponse>>builder()
-                .result(productService.getAllProducts())
-                .build();
-    }
+
     @DeleteMapping("/{id}")
     public ApiResponse<String> deleteProduct(@PathVariable String id){
         productService.deleteProduct(id);

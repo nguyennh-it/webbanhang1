@@ -1,4 +1,3 @@
-
 <head>
     <title>Cửa Hàng Đồ Thể Thao</title>
     <!-- 1. Thay thế CSS và Meta -->
@@ -10,8 +9,13 @@
 <div th:replace="~{layout :: navbar}"></div>
 
 <div class="container mt-5">
-    <!-- Giữ lại tiêu đề nếu bạn muốn hiện cả ở Navbar và ở giữa trang -->
     <h1 class="text-center mb-4">👟 Danh Mục Sản Phẩm ⚽</h1>
+
+    <!-- Nếu không có sản phẩm nào, hiển thị thông báo -->
+    <div th:if="${#lists.isEmpty(products)}" class="text-center my-5">
+        <p class="h4 text-muted">Không tìm thấy sản phẩm nào.</p>
+        <a th:href="@{/store/products}" class="btn btn-secondary mt-2">Quay lại danh sách</a>
+    </div>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
         <div class="col" th:each="p : ${products}">
@@ -41,6 +45,30 @@
             </div>
         </div>
     </div>
+
+    <!-- PHẦN PHÂN TRANG: Chèn vào ngay dưới row danh sách sản phẩm -->
+    <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-5">
+        <nav aria-label="Page navigation">
+            <ul class="pagination shadow-sm">
+                <!-- Nút Về Trước -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/store/products(page=${currentPage - 1}, keyword=${keyword})}">Trước</a>
+                </li>
+
+                <!-- Hiển thị danh sách số trang 1, 2, 3... -->
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:href="@{/store/products(page=${i}, keyword=${keyword})}" th:text="${i + 1}"></a>
+                </li>
+
+                <!-- Nút Sang Sau -->
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/store/products(page=${currentPage + 1}, keyword=${keyword})}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
 </div>
 
 <!-- 3. Nhúng Chân trang chung -->

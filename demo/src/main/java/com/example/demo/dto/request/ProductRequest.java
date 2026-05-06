@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductRequest {
+    @NotBlank(message = "Tên sản phẩm không được để trống")
     @NotBlank(message = "PRODUCT_NAME_REQUIRED")
     String name;
     String description;

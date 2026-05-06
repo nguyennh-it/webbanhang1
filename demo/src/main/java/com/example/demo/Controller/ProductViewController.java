@@ -2,11 +2,13 @@ package com.example.demo.Controller;
 
 import com.example.demo.dto.request.ProductRequest;
 import com.example.demo.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -21,27 +23,35 @@ public class ProductViewController {
     @GetMapping("/products")
     public String listProducts(
             Model model,
-            @RequestParam(name = "keyword", required = false) String keyword) {
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "page", defaultValue = "0") int page) {
 
-        // Nếu có keyword thì tìm kiếm, không thì lấy tất cả
-        var products = (keyword != null && !keyword.isEmpty())
-                ? productService.searchProducts(keyword)
-                : productService.getAllProducts();
+        int pageSize = 6;  // Bạn muốn hiện bao nhiêu sản phẩm trên 1 trang thì sửa ở đây
 
-        model.addAttribute("products", products);
-        model.addAttribute("keyword", keyword); // Gửi lại keyword để giữ chữ trong ô nhập
+        // Gọi hàm getProducts mới trả về đối tượng Page
+        var pageData = productService.getProducts(page, pageSize, keyword);
+
+        // Đẩy dữ liệu ra giao diện
+        model.addAttribute("products", pageData.getContent()); // Danh sách sản phẩm của trang hiện tại
+        model.addAttribute("totalPages", pageData.getTotalPages()); // Tổng số trang (để vẽ nút 1,2,3)
+        model.addAttribute("currentPage", page); // Trang hiện tại (để tô màu nút đang chọn)
+        model.addAttribute("keyword", keyword); // Giữ lại từ khóa tìm kiếm trên thanh search
+
         return "product-list";
     }
-
     // Hiển thị form thêm sản phẩm
     @GetMapping("/add")
-    public String showAddForm() {
-        return "add-product"; // → templates/add-product.html
+    public String showAddForm(Model model) {
+        model.addAttribute("request", new ProductRequest()); // ← Thymeleaf cần object này
+        return "add-product";
     }
 
     // Xử lý thêm sản phẩm
     @PostMapping("/add")
-    public String addProduct(@ModelAttribute ProductRequest request) {
+    public String addProduct(@Valid @ModelAttribute("request") ProductRequest request, BindingResult result,Model model) {
+        if (result.hasErrors()) {
+            return "add-product"; // Quay lại form add để hiện thông báo lỗi
+        }
         productService.createProduct(request);
         return "redirect:/store/products";
     }
@@ -55,7 +65,10 @@ public class ProductViewController {
 
     // Xử lý cập nhật sản phẩm
     @PostMapping("/edit/{id}")
-    public String updateProduct(@PathVariable String id, @ModelAttribute ProductRequest request) {
+    public String updateProduct(@PathVariable String id, @Valid @ModelAttribute ProductRequest request, BindingResult result) {
+        if (result.hasErrors()) {
+            return "edit-product"; // Quay lại form edit nếu có lỗi
+        }
         productService.updateProduct(id, request);
         return "redirect:/store/products";
     }
