@@ -30,7 +30,7 @@ public class ProductViewController {
 
         // Gọi hàm getProducts mới trả về đối tượng Page
         var pageData = productService.getProducts(page, pageSize, keyword);
-
+        model.addAttribute("products", pageData.getContent());
         // Đẩy dữ liệu ra giao diện
         model.addAttribute("products", pageData.getContent()); // Danh sách sản phẩm của trang hiện tại
         model.addAttribute("totalPages", pageData.getTotalPages()); // Tổng số trang (để vẽ nút 1,2,3)

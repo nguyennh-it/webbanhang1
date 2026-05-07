@@ -1,43 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Cửa Hàng Đồ Thể Thao</title>
-    <!-- 1. Thay thế CSS và Meta -->
     <th:block th:replace="~{layout :: header-css}"></th:block>
+    <style>
+        /* Đảm bảo Card có độ cao bằng nhau và hiệu ứng đổ bóng */
+        .product-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+        /* Khống chế ảnh luôn đều tăm tắp */
+        .card-img-top {
+            height: 250px;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body class="bg-light">
 
-<!-- 2. Nhúng thanh Menu chung (Đã có sẵn nút Thêm và Tìm kiếm) -->
 <div th:replace="~{layout :: navbar}"></div>
 
 <div class="container mt-5">
-    <h1 class="text-center mb-4">👟 Danh Mục Sản Phẩm ⚽</h1>
+    <h1 class="text-center mb-5 fw-bold">👟 Danh Mục Sản Phẩm ⚽</h1>
 
-    <!-- Nếu không có sản phẩm nào, hiển thị thông báo -->
     <div th:if="${#lists.isEmpty(products)}" class="text-center my-5">
-        <p class="h4 text-muted">Không tìm thấy sản phẩm nào.</p>
-        <a th:href="@{/store/products}" class="btn btn-secondary mt-2">Quay lại danh sách</a>
+        <div class="p-5 bg-white rounded shadow-sm">
+            <p class="h4 text-muted">Hiện tại chưa có sản phẩm nào trong cửa hàng.</p>
+            <a th:href="@{/store/products}" class="btn btn-primary mt-3">Tải lại trang</a>
+        </div>
     </div>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
         <div class="col" th:each="p : ${products}">
             <div class="card h-100 shadow-sm product-card">
-                <img th:src="${p.imageUrl != null and !#strings.isEmpty(p.imageUrl)} ? ${p.imageUrl} : 'https://placehold.co/300x200?text=San+Pham'"
-                     class="card-img-top" alt="Ảnh sản phẩm" referrerpolicy="no-referrer"
-                     onerror="this.src='https://placehold.co/300x200?text=San+Pham'">
-                <div class="card-body">
-                    <h5 class="card-title" th:text="${p.name}">Tên sản phẩm</h5>
-                    <p class="card-text text-muted" th:text="${p.description}">Mô tả sản phẩm</p>
+                <img th:src="${p.imageUrl != null and !#strings.isEmpty(p.imageUrl)} ? ${p.imageUrl} : 'https://placehold.co/300x200?text=Sport+Store'"
+                     class="card-img-top" alt="Ảnh sản phẩm"
+                     onerror="this.src='https://placehold.co/300x200?text=No+Image'">
 
-                    <div class="card-footer-area">
-                        <p class="h5 text-danger mb-3"
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-bold text-dark" th:text="${p.name}">Tên sản phẩm</h5>
+                    <p class="card-text text-muted small flex-grow-1"
+                       th:text="${p.description != null ? p.description : 'Sản phẩm chất lượng cao dành cho vận động viên.'}">
+                        Mô tả sản phẩm
+                    </p>
+
+                    <div class="mt-3">
+                        <p class="h4 text-danger fw-bold mb-3"
                            th:text="${p.price != null} ? ${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ' : 'Liên hệ'">
                             0 VNĐ
                         </p>
-                        <button class="btn btn-primary w-100 mb-2">Thêm vào giỏ 🛒</button>
+
+                        <form th:action="@{/cart/add}" method="post" class="mb-2">
+                            <input type="hidden" name="productId" th:value="${p.id}">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
+                                Thêm vào giỏ 🛒
+                            </button>
+                        </form>
+
                         <div class="d-flex gap-2">
                             <a th:href="@{/store/edit/{id}(id=${p.id})}"
-                               class="btn btn-warning text-white flex-grow-1">Sửa</a>
+                               class="btn btn-outline-warning btn-sm flex-grow-1">Sửa</a>
                             <a th:href="@{/store/delete/{id}(id=${p.id})}"
-                               class="btn btn-danger flex-grow-1"
+                               class="btn btn-outline-danger btn-sm flex-grow-1"
                                onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này không?')">Xóa</a>
                         </div>
                     </div>
@@ -46,32 +76,24 @@
         </div>
     </div>
 
-    <!-- PHẦN PHÂN TRANG: Chèn vào ngay dưới row danh sách sản phẩm -->
     <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-5">
-        <nav aria-label="Page navigation">
+        <nav>
             <ul class="pagination shadow-sm">
-                <!-- Nút Về Trước -->
                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                     <a class="page-link" th:href="@{/store/products(page=${currentPage - 1}, keyword=${keyword})}">Trước</a>
                 </li>
-
-                <!-- Hiển thị danh sách số trang 1, 2, 3... -->
                 <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                     th:classappend="${currentPage == i} ? 'active'">
                     <a class="page-link" th:href="@{/store/products(page=${i}, keyword=${keyword})}" th:text="${i + 1}"></a>
                 </li>
-
-                <!-- Nút Sang Sau -->
                 <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                     <a class="page-link" th:href="@{/store/products(page=${currentPage + 1}, keyword=${keyword})}">Sau</a>
                 </li>
             </ul>
         </nav>
     </div>
-
 </div>
 
-<!-- 3. Nhúng Chân trang chung -->
 <div th:replace="~{layout :: footer}"></div>
 
 </body>

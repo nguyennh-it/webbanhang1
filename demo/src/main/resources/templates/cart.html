@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Giỏ hàng - Sport Store</title>
+    <th:block th:replace="~{layout :: header-css}"></th:block>
+</head>
+<body class="bg-light">
+<div th:replace="~{layout :: navbar}"></div>
+
+<div class="container mt-5">
+    <h2 class="mb-4 fw-bold">🛒 Giỏ hàng của bạn</h2>
+
+    <div class="table-responsive bg-white p-4 shadow-sm rounded">
+        <table class="table align-middle">
+            <thead class="table-dark">
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Tổng</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${cartItems}">
+                <td>
+                    <div class="d-flex align-items-center">
+                        <img th:src="${item.product.imageUrl}" width="60" class="rounded me-3">
+                        <span class="fw-bold" th:text="${item.product.name}">Tên</span>
+                    </div>
+                </td>
+                <td th:text="${#numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0</td>
+                <td th:text="${item.quantity}">1</td>
+                <td class="fw-bold text-danger" th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="text-end mt-4">
+            <h4>Tổng thanh toán: <span class="text-danger fw-bold" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0</span></h4>
+            <a href="/store/products" class="btn btn-outline-secondary">Quay lại mua sắm</a>
+            <button class="btn btn-success px-4 ms-2">Thanh toán ngay</button>
+        </div>
+    </div>
+</div>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

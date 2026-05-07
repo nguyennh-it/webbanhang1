@@ -13,21 +13,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration                                                  //Đánh dấu đây là một file cấu hình
-@EnableWebSecurity                                                  //Kích hoạt tính năng bảo mật web của Spring Security
+@Configuration
+@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {                 //Quy định thuật toán mã hóa mật khẩu
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager() {          //Là trung tâm điều khiển việc xác thực.
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(passwordEncoder());
+    public AuthenticationManager authenticationManager() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder());
         provider.setUserDetailsService(customUserDetailsService);
         return new ProviderManager(provider);
     }
@@ -35,33 +36,36 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authenticationManager(authenticationManager())
-            .authorizeHttpRequests(auth -> auth
-                // Trang login và tài nguyên tĩnh: ai cũng vào được
-                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll() //Bất kỳ ai, kể cả khách chưa đăng nhập, đều có quyền truy cập
-                // Xem danh sách: ai cũng xem được
-                .requestMatchers("/store/products").permitAll()
-                // Thêm/sửa/xóa: chỉ ADMIN
-                .requestMatchers("/store/add/**", "/store/edit/**", "/store/delete/**").hasRole("ADMIN")
-                // Còn lại phải đăng nhập
-                .anyRequest().authenticated()
-            )
-            .formLogin(login -> login
-                .loginPage("/login")
-                .loginProcessingUrl("/login")   // URL nhận POST từ form
-                .usernameParameter("username")  // khớp với name="username" trong HTML
-                .passwordParameter("password")  // khớp với name="password" trong HTML
-                .defaultSuccessUrl("/store/products", true)
-                .failureUrl("/login?error=true")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .permitAll()
-            )
-            .exceptionHandling(ex -> ex.accessDeniedPage("/403"))
-            .csrf(csrf -> csrf.disable()); // tắt CSRF để form hoạt động đơn giản
+                .authenticationManager(authenticationManager())
+                .authorizeHttpRequests(auth -> auth
+                        // 1. Cho phép truy cập công khai: Login, CSS, JS và Hình ảnh
+                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+
+                        // 2. Cho phép xem sản phẩm và THỰC HIỆN thao tác giỏ hàng (Thêm/Xem) không cần Login
+                        // Việc thêm "/cart/**" vào permitAll giúp nút "Thêm vào giỏ" hoạt động tự do
+                        .requestMatchers("/store/products", "/cart/**").permitAll()
+
+                        // 3. Chỉ Admin mới có quyền can thiệp vào kho hàng
+                        .requestMatchers("/store/add/**", "/store/edit/**", "/store/delete/**").hasRole("ADMIN")
+
+                        // 4. Các yêu cầu khác phải xác thực
+                        .anyRequest().authenticated()
+                )
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/store/products", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .permitAll()
+                )
+                // QUAN TRỌNG: Vô hiệu hóa CSRF để các request POST từ form "Thêm vào giỏ" không bị chặn 403
+                .csrf(csrf -> csrf.disable())
+                .exceptionHandling(ex -> ex.accessDeniedPage("/403"));
 
         return http.build();
     }
