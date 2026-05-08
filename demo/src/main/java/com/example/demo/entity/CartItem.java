@@ -17,5 +17,6 @@ public class CartItem {
     @ManyToOne
     Product product;            // Nối với bảng Product bạn đã có
     int quantity;
-    String userId;   // Để biết giỏ hàng này của ai
+    String userId;
+    private String size;// Để biết giỏ hàng này của ai
 }

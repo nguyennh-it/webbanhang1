@@ -18,4 +18,5 @@ public class ProductResponse {
     int stock;
     String category;
     String imageUrl;
+    private String sizes;
 }

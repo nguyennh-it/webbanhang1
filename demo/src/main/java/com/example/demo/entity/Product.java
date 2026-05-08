@@ -24,4 +24,5 @@ public class Product {
     int stock;
     String category;
     String imageUrl;
+    private String sizes;
 }
