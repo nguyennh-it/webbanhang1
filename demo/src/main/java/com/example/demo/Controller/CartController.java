@@ -1,14 +1,14 @@
 package com.example.demo.Controller;
 
+import com.example.demo.entity.CartItem;
 import com.example.demo.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/cart")
@@ -16,13 +16,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class CartController {
     private final CartService cartService;
 
-    // Sửa chỗ này để khớp với cái URL mày hay gõ
-    @GetMapping("/view")
+    @GetMapping("")
     public String viewCart(Model model, Authentication auth) {
         if (auth == null) return "redirect:/login";
 
-        // Lưu ý: "items" này phải khớp với th:each="item : ${items}" trong file cart.html
-        model.addAttribute("items", cartService.getCartItems(auth.getName()));
+        List<CartItem> cartItems = cartService.getCartItems(auth.getName());
+
+        // Tính tổng tiền của cả giỏ hàng
+        double total = cartItems.stream()
+                .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
+                .sum();
+
+        model.addAttribute("items", cartItems); // Đặt tên là "items"
+        model.addAttribute("totalPrice", total); // Gửi tổng tiền sang HTML
         return "cart";
     }
 
@@ -31,8 +37,12 @@ public class CartController {
         if (auth == null) return "redirect:/login";
 
         cartService.addToCart(id, auth.getName());
+        // Thêm xong thì đẩy thẳng sang trang giỏ hàng để xem luôn
+        return "redirect:/cart";
+    }
 
-        // Sửa lại redirect cho đúng cái trang cửa hàng của mày
+    @PostMapping("/add")
+    public String addToCartNoId() {
         return "redirect:/store/products";
     }
 }
