@@ -18,7 +18,7 @@
                 <th>Giá</th>
                 <th>Số lượng</th>
                 <th>Tổng</th>
-            </tr>
+                <th class="text-center">Hành động</th> </tr>
             </thead>
             <tbody>
             <tr th:each="item : ${items}">
@@ -32,6 +32,11 @@
                 <td th:text="${item.quantity}">1</td>
                 <td class="fw-bold text-danger"
                     th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0</td>
+                <td class="text-center"> <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post"
+                                               onsubmit="return confirm('Bạn  chắc chắn muốn bỏ món này chứ?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                </form>
+                </td>
             </tr>
             </tbody>
         </table>
