@@ -56,13 +56,11 @@
                             0 VNĐ
                         </p>
 
-                        <form th:action="@{/cart/add}" method="post" class="mb-2">
-                            <input type="hidden" name="productId" th:value="${p.id}">
+                        <form th:action="@{/cart/add/{id}(id=${p.id})}" method="post" class="mb-2">
                             <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
                                 Thêm vào giỏ 🛒
                             </button>
                         </form>
-
                         <div class="d-flex gap-2">
                             <a th:href="@{/store/edit/{id}(id=${p.id})}"
                                class="btn btn-outline-warning btn-sm flex-grow-1">Sửa</a>
