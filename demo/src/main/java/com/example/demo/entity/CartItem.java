@@ -2,21 +2,23 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+
     @ManyToOne
-    Product product;            // Nối với bảng Product bạn đã có
+    Product product;
+
     int quantity;
-    String userId;
-    private String size;// Để biết giỏ hàng này của ai
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    User user;
 }
